@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -6,342 +7,524 @@
 <title>Top Chef Fantasy League</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
-  :root{--fire:#E8440A;--gold:#C9A84C;--cream:#F5F0E8;--ink:#1A1208;--ash:#8A7D6B;--neg:#8B2020}
+  :root { --fire:#E8440A;--gold:#C9A84C;--cream:#F5F0E8;--ink:#1A1208;--ash:#8A7D6B;--neg:#8B2020; }
   *{margin:0;padding:0;box-sizing:border-box}
-  body{background:var(--ink);color:var(--cream);font-family:'DM Mono',monospace;min-height:100vh}
-  header{padding:32px 20px 20px;border-bottom:1px solid rgba(201,168,76,.3);display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:12px}
-  h1{font-family:'Playfair Display',serif;font-size:clamp(1.8rem,6vw,3rem);font-weight:900;line-height:1}
-  h1 span{color:var(--fire)}
-  .sub{font-size:.65rem;letter-spacing:.2em;text-transform:uppercase;color:var(--ash);margin-top:6px}
-  .week-ctrl{display:flex;align-items:center;gap:10px}
-  .week-label{font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;color:var(--ash)}
-  .week-num{font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:700;color:var(--gold);min-width:2ch;text-align:center}
-  .wbtn{width:32px;height:32px;border:1px solid rgba(201,168,76,.4);background:transparent;color:var(--gold);font-size:1.1rem;cursor:pointer;border-radius:2px}
-  .tabs{display:flex;border-bottom:1px solid rgba(201,168,76,.15);overflow-x:auto;padding:0 20px}
-  .tab{padding:12px 16px;font-size:.6rem;letter-spacing:.16em;text-transform:uppercase;color:var(--ash);border:none;border-bottom:2px solid transparent;background:none;cursor:pointer;white-space:nowrap;font-family:'DM Mono',monospace}
+  body{background:var(--ink);color:var(--cream);font-family:'DM Mono',monospace;min-height:100vh;overflow-x:hidden}
+  body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:1000;opacity:.4}
+  header{padding:48px 40px 32px;border-bottom:1px solid rgba(201,168,76,.3);display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap}
+  .title-block h1{font-family:'Playfair Display',serif;font-size:clamp(2.2rem,5vw,3.8rem);font-weight:900;line-height:1;letter-spacing:-.02em}
+  .title-block h1 span{color:var(--fire)}
+  .title-block p{margin-top:8px;font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;color:var(--ash)}
+  .week-control{display:flex;align-items:center;gap:12px}
+  .week-label{font-size:.65rem;letter-spacing:.2em;text-transform:uppercase;color:var(--ash)}
+  .week-display{font-family:'Playfair Display',serif;font-size:2rem;font-weight:700;color:var(--gold);min-width:2ch;text-align:center}
+  .week-btn{width:36px;height:36px;border:1px solid rgba(201,168,76,.4);background:transparent;color:var(--gold);font-size:1.2rem;cursor:pointer;border-radius:2px;transition:all .15s;display:flex;align-items:center;justify-content:center}
+  .week-btn:hover{background:rgba(201,168,76,.15);border-color:var(--gold)}
+  .tabs{display:flex;padding:0 40px;border-bottom:1px solid rgba(201,168,76,.15);overflow-x:auto}
+  .tab{padding:14px 20px;font-size:.65rem;letter-spacing:.18em;text-transform:uppercase;color:var(--ash);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:all .2s;background:none;border-top:none;border-left:none;border-right:none;font-family:'DM Mono',monospace}
+  .tab:hover{color:var(--cream)}
   .tab.active{color:var(--gold);border-bottom-color:var(--gold)}
-  .main{padding:24px 20px}
-  .sync-bar{display:flex;align-items:center;gap:10px;margin-bottom:20px;flex-wrap:wrap}
-  .sync-btn{background:rgba(201,168,76,.12);border:1px solid rgba(201,168,76,.3);color:var(--gold);font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;padding:6px 14px;border-radius:3px;cursor:pointer;font-family:'DM Mono',monospace}
-  .sync-st{font-size:.62rem;color:var(--ash)}
-  .sync-st.ok{color:#7BC67E}.sync-st.err{color:#E07070}
-  .card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:4px;margin-bottom:10px;overflow:hidden}
-  .card-header{display:grid;grid-template-columns:32px 1fr auto auto;align-items:center;gap:14px;padding:12px 16px;cursor:pointer}
-  .rank{font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:700;text-align:center}
-  .r1{color:var(--gold)}.r2{color:#B0B0B0}.r3{color:#CD7F32}.r0{color:#5a4e3f}
-  .team-name{font-size:1rem;font-weight:700;font-family:'Playfair Display',serif}
-  .team-chefs{font-size:.6rem;color:var(--ash);margin-top:2px}
-  .team-score{font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:900}
-  .exp-btn{background:none;border:none;color:var(--ash);cursor:pointer;font-size:.75rem;padding:4px;transition:transform .2s}
-  .exp-btn.open{transform:rotate(180deg)}
-  .chef-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:12px 16px;border-top:1px solid rgba(255,255,255,.06)}
-  .chef-block{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.05);border-radius:3px;padding:10px 12px}
-  .chef-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
-  .chef-name{font-family:'Playfair Display',serif;font-size:.9rem;font-weight:700}
-  .chef-pts{font-size:.9rem;color:var(--gold)}
-  .status-row{display:flex;align-items:center;gap:6px;margin-bottom:8px}
-  .dot{width:6px;height:6px;border-radius:50%;background:#4CAF50;flex-shrink:0}
+  .main{padding:32px 40px}
+  .scoreboard{display:grid;gap:12px}
+  .team-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:4px;overflow:hidden;transition:border-color .2s}
+  .team-card:hover{border-color:rgba(201,168,76,.25)}
+  .team-header{display:grid;grid-template-columns:36px 1fr auto auto;align-items:center;gap:16px;padding:14px 20px;cursor:pointer}
+  .rank{font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:700;color:var(--ash);text-align:center}
+  .rank.r1{color:var(--gold)}.rank.r2{color:#B0B0B0}.rank.r3{color:#CD7F32}
+  .team-info{min-width:0}
+  .team-name{font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .team-chefs{font-size:.65rem;color:var(--ash);letter-spacing:.1em;margin-top:2px}
+  .team-score{font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:900;text-align:right}
+  .expand-btn{color:var(--ash);font-size:.8rem;transition:transform .2s;cursor:pointer;background:none;border:none;padding:4px}
+  .team-card.open .expand-btn{transform:rotate(180deg)}
+  .team-detail{display:none;border-top:1px solid rgba(255,255,255,.06)}
+  .team-card.open .team-detail{display:block}
+  .chef-section{padding:16px 20px;display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .chef-block{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.05);border-radius:3px;padding:12px 14px}
+  .chef-block-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+  .chef-name{font-family:'Playfair Display',serif;font-size:1rem;font-weight:700}
+  .chef-score{font-size:1rem;font-weight:500;color:var(--gold)}
+  .chef-status{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+  .dot{width:7px;height:7px;border-radius:50%;background:#4CAF50;flex-shrink:0}
   .dot.out{background:var(--neg)}
-  .status-txt{font-size:.55rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ash)}
-  .ev-log{font-size:.6rem}
-  .ev-row{display:flex;justify-content:space-between;padding:2px 0;border-bottom:1px solid rgba(255,255,255,.04)}
+  .status-text{font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ash)}
+  .event-log{font-size:.65rem;display:flex;flex-direction:column;gap:4px}
+  .ev{display:flex;justify-content:space-between;align-items:center;padding:3px 0;border-bottom:1px solid rgba(255,255,255,.04)}
+  .ev:last-child{border-bottom:none}
   .ev-name{color:var(--ash)}
-  .pos{color:#7BC67E;font-weight:500}.neg{color:#E07070;font-weight:500}
+  .pts{font-weight:500}
+  .pos{color:#7BC67E}.neg{color:#E07070}
+  .score-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+  .score-cat{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:4px;padding:20px}
+  .score-cat h3{font-family:'Playfair Display',serif;font-size:.9rem;color:var(--ash);letter-spacing:.1em;text-transform:uppercase;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid rgba(255,255,255,.06)}
+  .rule{display:flex;justify-content:space-between;align-items:center;padding:6px 0;font-size:.72rem;border-bottom:1px solid rgba(255,255,255,.03)}
+  .rule:last-child{border-bottom:none}
+  .log-form{max-width:520px}
+  .form-title{font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:700;margin-bottom:24px}
+  .field{margin-bottom:16px}
+  .field label{display:block;font-size:.62rem;letter-spacing:.18em;text-transform:uppercase;color:var(--ash);margin-bottom:6px}
+  .field select,.field input{width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);color:var(--cream);font-family:'DM Mono',monospace;font-size:.8rem;padding:10px 14px;border-radius:3px;outline:none;transition:border-color .15s;appearance:none}
+  .field select:focus,.field input:focus{border-color:var(--gold)}
+  .field select option{background:#2a2018}
+  .submit-btn{background:var(--fire);color:white;border:none;font-family:'DM Mono',monospace;font-size:.7rem;letter-spacing:.15em;text-transform:uppercase;padding:12px 28px;border-radius:3px;cursor:pointer;transition:background .15s;margin-top:8px}
+  .submit-btn:hover{background:#c93a08}
+  .toast{display:none;margin-top:14px;padding:10px 16px;background:rgba(76,175,80,.15);border:1px solid rgba(76,175,80,.3);border-radius:3px;font-size:.72rem;color:#7BC67E}
+  .htable{width:100%;border-collapse:collapse;font-size:.72rem}
+  .htable th{text-align:left;font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;color:var(--ash);padding:8px 12px;border-bottom:1px solid rgba(255,255,255,.08);font-weight:400}
+  .htable td{padding:9px 12px;border-bottom:1px solid rgba(255,255,255,.04)}
+  .htable tr:last-child td{border-bottom:none}
+  .htable tr:hover td{background:rgba(255,255,255,.02)}
+  .del-btn{background:none;border:1px solid rgba(255,255,255,.1);color:var(--ash);cursor:pointer;font-size:.65rem;padding:3px 8px;border-radius:2px;transition:all .15s;font-family:'DM Mono',monospace}
+  .del-btn:hover{border-color:var(--neg);color:#E07070}
+  .auto-badge{font-size:.55rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ash);background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:2px;padding:2px 5px}
+  .empty{text-align:center;padding:60px 20px;color:var(--ash);font-size:.75rem}
   .hidden{display:none}
-  .field{margin-bottom:14px}
-  label{display:block;font-size:.58rem;letter-spacing:.16em;text-transform:uppercase;color:var(--ash);margin-bottom:5px}
-  select,input[type=number]{width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);color:var(--cream);font-family:'DM Mono',monospace;font-size:.78rem;padding:9px 12px;border-radius:3px;outline:none;appearance:none}
-  select option{background:#2a2018}
-  .submit-btn{background:var(--fire);color:white;border:none;font-family:'DM Mono',monospace;font-size:.65rem;letter-spacing:.14em;text-transform:uppercase;padding:11px 24px;border-radius:3px;cursor:pointer;margin-top:6px}
-  .toast{display:none;margin-top:12px;padding:9px 14px;background:rgba(76,175,80,.15);border:1px solid rgba(76,175,80,.3);border-radius:3px;font-size:.68rem;color:#7BC67E}
-  table{width:100%;border-collapse:collapse;font-size:.68rem}
-  th{text-align:left;font-size:.57rem;letter-spacing:.16em;text-transform:uppercase;color:var(--ash);padding:7px 10px;border-bottom:1px solid rgba(255,255,255,.08);font-weight:400}
-  td{padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.04)}
-  .del-btn{background:none;border:1px solid rgba(255,255,255,.1);color:var(--ash);cursor:pointer;font-size:.58rem;padding:2px 7px;border-radius:2px;font-family:'DM Mono',monospace}
-  .auto-badge{font-size:.52rem;text-transform:uppercase;color:var(--ash);background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:2px;padding:1px 4px}
-  .score-box{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:4px;padding:18px;margin-bottom:14px}
-  .score-title{font-size:.8rem;color:var(--ash);letter-spacing:.1em;text-transform:uppercase;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,.06);font-family:'Playfair Display',serif}
-  .rule-row{display:flex;justify-content:space-between;padding:5px 0;font-size:.7rem;border-bottom:1px solid rgba(255,255,255,.03)}
-  .empty{text-align:center;padding:60px 0;color:var(--ash)}
-  @media(max-width:480px){.chef-grid{grid-template-columns:1fr}}
+  .sync-bar{display:flex;align-items:center;gap:12px;margin-bottom:24px;flex-wrap:wrap}
+  .sync-btn{background:rgba(201,168,76,.12);border:1px solid rgba(201,168,76,.3);color:var(--gold);font-family:'DM Mono',monospace;font-size:.65rem;letter-spacing:.12em;text-transform:uppercase;padding:7px 16px;border-radius:3px;cursor:pointer;transition:all .15s}
+  .sync-btn:hover{background:rgba(201,168,76,.2)}
+  .sync-status{font-size:.65rem;color:var(--ash)}
+  .sync-status.ok{color:#7BC67E}
+  .sync-status.err{color:#E07070}
+  @media(max-width:600px){.chef-section{grid-template-columns:1fr}.tabs,.main,header{padding-left:20px;padding-right:20px}}
 </style>
 </head>
 <body>
+
 <header>
-  <div>
+  <div class="title-block">
     <h1>TOP <span>CHEF</span></h1>
-    <div class="sub">Fantasy League · Season 23: Carolinas</div>
+    <p>Fantasy League · Season 23: Carolinas</p>
   </div>
-  <div class="week-ctrl">
-    <span class="week-label">Week</span>
-    <button class="wbtn" onclick="changeWeek(-1)">−</button>
-    <div class="week-num" id="weekNum">3</div>
-    <button class="wbtn" onclick="changeWeek(1)">+</button>
+  <div class="week-control">
+    <span class="week-label">Current Week</span>
+    <button class="week-btn" onclick="changeWeek(-1)">−</button>
+    <div class="week-display" id="weekDisplay">4</div>
+    <button class="week-btn" onclick="changeWeek(1)">+</button>
   </div>
 </header>
 
 <div class="tabs">
   <button class="tab active" onclick="showTab('scoreboard',this)">Scoreboard</button>
   <button class="tab" onclick="showTab('log',this)">Log Event</button>
-  <button class="tab" onclick="showTab('history',this)">History</button>
-  <button class="tab" onclick="showTab('scoring',this)">Rules</button>
+  <button class="tab" onclick="showTab('history',this)">Event History</button>
+  <button class="tab" onclick="showTab('scoring',this)">Scoring Rules</button>
 </div>
 
 <div class="main">
+
   <div id="tab-scoreboard">
     <div class="sync-bar">
-      <button class="sync-btn" onclick="syncWiki()">↻ Sync Wikipedia</button>
-      <span class="sync-st" id="syncSt">Pre-loaded thru Wk2 · Wk3 survival applied</span>
+      <button class="sync-btn" onclick="syncWikipedia()">↻ Sync from Wikipedia</button>
+      <span class="sync-status" id="syncStatus">Pre-loaded through Week 3 · Week 4 survival applied · Click sync after new episodes air</span>
     </div>
-    <div id="board"></div>
+    <div class="scoreboard" id="scoreboardList"></div>
   </div>
 
   <div id="tab-log" class="hidden">
-    <div style="max-width:480px">
-      <div style="font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;margin-bottom:20px">Log an Event</div>
-      <div class="field"><label>Chef</label>
-        <select id="chefSel"></select></div>
+    <div class="log-form">
+      <div class="form-title">Log an Event</div>
+      <div class="field"><label>Chef</label><select id="chefSelect"></select></div>
       <div class="field"><label>Event Type</label>
-        <select id="typeSel">
+        <select id="eventSelect">
           <option value="quickfire">Quick Fire Winner (+5)</option>
-          <option value="top_elim">Top of Elimination (+3)</option>
-          <option value="win_elim">Elimination Winner (+7)</option>
+          <option value="top_elim">Top of Elimination Challenge (+3)</option>
+          <option value="win_elim">Winner of Elimination Challenge (+7)</option>
           <option value="bottom">Bottom Judges Table (−2)</option>
           <option value="restaurant_wars">Restaurant Wars Winner (+5)</option>
-          <option value="lck_win">LCK Winner (+10)</option>
+          <option value="lck_win">Last Chance Kitchen Winner (+10)</option>
           <option value="eliminated">Eliminated</option>
-        </select></div>
-      <div class="field"><label>Week</label>
-        <input type="number" id="weekSel" min="2" max="14" value="3"></div>
+        </select>
+      </div>
+      <div class="field"><label>Week</label><input type="number" id="eventWeek" min="2" max="14" value="3"></div>
       <button class="submit-btn" onclick="logEvent()">Record Event</button>
-      <div class="toast" id="toast">✓ Event recorded!</div>
+      <div class="toast" id="toast">Event recorded!</div>
     </div>
   </div>
 
   <div id="tab-history" class="hidden">
-    <div id="histContent"></div>
+    <table class="htable">
+      <thead><tr><th>Week</th><th>Chef</th><th>Team</th><th>Event</th><th>Pts</th><th>Source</th><th></th></tr></thead>
+      <tbody id="histBody"></tbody>
+    </table>
+    <div id="histEmpty" class="empty">No events logged yet.</div>
   </div>
 
   <div id="tab-scoring" class="hidden">
-    <div class="score-box">
-      <div class="score-title">Performance</div>
-      <div class="rule-row"><span>Quick Fire Winner</span><span class="pos">+5</span></div>
-      <div class="rule-row"><span>Top of Elimination Challenge</span><span class="pos">+3</span></div>
-      <div class="rule-row"><span>Winner of Elimination Challenge</span><span class="pos">+7</span></div>
-      <div class="rule-row"><span>Bottom Judges Table</span><span class="neg">−2</span></div>
-      <div class="rule-row"><span>Restaurant Wars Winner</span><span class="pos">+5</span></div>
-      <div class="rule-row"><span>Last Chance Kitchen Winner</span><span class="pos">+10</span></div>
-    </div>
-    <div class="score-box">
-      <div class="score-title">Survival (cumulative, starts Week 2)</div>
-      <div class="rule-row"><span>Survive to Week 3</span><span class="pos">+1</span></div>
-      <div class="rule-row"><span>Survive to Week 4</span><span class="pos">+2</span></div>
-      <div class="rule-row"><span>Survive to Week 5</span><span class="pos">+3</span></div>
-      <div class="rule-row"><span>Survive to Week 6</span><span class="pos">+4</span></div>
-      <div class="rule-row"><span>Survive to Week 7</span><span class="pos">+5</span></div>
-      <div class="rule-row"><span>Survive to Week 8</span><span class="pos">+6</span></div>
-      <div class="rule-row"><span>Survive to Week 9</span><span class="pos">+7</span></div>
-      <div class="rule-row"><span>Survive to Week 10</span><span class="pos">+8</span></div>
-      <div class="rule-row"><span>Survive to Week 11</span><span class="pos">+9</span></div>
-      <div class="rule-row"><span>Survive to Week 12</span><span class="pos">+10</span></div>
-      <div class="rule-row"><span>Survive to Week 13</span><span class="pos">+11</span></div>
-      <div class="rule-row"><span>Survive to Week 14</span><span class="pos">+12</span></div>
-      <div class="rule-row"><span>Top 2</span><span class="pos">+15</span></div>
-      <div class="rule-row"><span>Winner</span><span class="pos">+30</span></div>
-      <div class="rule-row" style="margin-top:8px;border-top:1px solid rgba(255,255,255,.06)"><span style="color:var(--ash);font-size:.62rem">Week 1 does not count for survival</span></div>
+    <div class="score-grid">
+      <div class="score-cat">
+        <h3>Performance</h3>
+        <div class="rule"><span>Quick Fire Winner</span><span class="pts pos">+5</span></div>
+        <div class="rule"><span>Top of Elimination Challenge</span><span class="pts pos">+3</span></div>
+        <div class="rule"><span>Winner of Elimination Challenge</span><span class="pts pos">+7</span></div>
+        <div class="rule"><span>Bottom Judges Table</span><span class="pts neg">−2</span></div>
+        <div class="rule"><span>Restaurant Wars Winner</span><span class="pts pos">+5</span></div>
+        <div class="rule"><span>Last Chance Kitchen Winner</span><span class="pts pos">+10</span></div>
+      </div>
+      <div class="score-cat">
+        <h3>Survival (starts Week 2)</h3>
+        <div class="rule"><span>Survive to Week 3</span><span class="pts pos">+1</span></div>
+        <div class="rule"><span>Survive to Week 4</span><span class="pts pos">+2</span></div>
+        <div class="rule"><span>Survive to Week 5</span><span class="pts pos">+3</span></div>
+        <div class="rule"><span>Survive to Week 6</span><span class="pts pos">+4</span></div>
+        <div class="rule"><span>Survive to Week 7</span><span class="pts pos">+5</span></div>
+        <div class="rule"><span>Survive to Week 8</span><span class="pts pos">+6</span></div>
+        <div class="rule"><span>Survive to Week 9</span><span class="pts pos">+7</span></div>
+        <div class="rule"><span>Survive to Week 10</span><span class="pts pos">+8</span></div>
+        <div class="rule"><span>Survive to Week 11</span><span class="pts pos">+9</span></div>
+        <div class="rule"><span>Survive to Week 12</span><span class="pts pos">+10</span></div>
+        <div class="rule"><span>Survive to Week 13</span><span class="pts pos">+11</span></div>
+        <div class="rule"><span>Survive to Week 14</span><span class="pts pos">+12</span></div>
+        <div class="rule"><span>Top 2</span><span class="pts pos">+15</span></div>
+        <div class="rule"><span>Winner</span><span class="pts pos">+30</span></div>
+        <div class="rule" style="margin-top:6px;padding-top:8px;border-top:1px solid rgba(255,255,255,.06)"><span style="color:var(--ash);font-size:.62rem">Week 1 does not count for survival</span><span></span></div>
+      </div>
     </div>
   </div>
+
 </div>
 
 <script>
-const TEAMS=[
-  {house:"Abramans",chefs:["Duyen","Jennifer"]},
-  {house:"Broads",chefs:["Anthony","Jassi"]},
-  {house:"Cantors",chefs:["Rhoda","Nana"]},
-  {house:"Danielle",chefs:["Sherry","Justin"]},
-  {house:"Meserveys",chefs:["Jonathan","Oscar"]},
-  {house:"Saichs",chefs:["Brandon","Sieger"]},
-  {house:"Speyers",chefs:["Laurence","Brittany"]},
+// ── TEAMS ────────────────────────────────────────────────────
+const TEAMS = [
+  { house:"Abramans",  chefs:["Duyen","Jennifer"] },
+  { house:"Broads",    chefs:["Anthony","Jassi"] },
+  { house:"Cantors",   chefs:["Rhoda","Nana"] },
+  { house:"Danielle",  chefs:["Sherry","Justin"] },
+  { house:"Meserveys", chefs:["Jonathan","Oscar"] },
+  { house:"Saichs",    chefs:["Brandon","Sieger"] },
+  { house:"Speyers",   chefs:["Laurence","Brittany"] },
 ];
-const EDEFS={
-  quickfire:{label:"Quick Fire Winner",pts:5},
-  top_elim:{label:"Top of Elimination",pts:3},
-  win_elim:{label:"Elimination Winner",pts:7},
-  bottom:{label:"Bottom Judges Table",pts:-2},
-  restaurant_wars:{label:"Restaurant Wars Winner",pts:5},
-  lck_win:{label:"LCK Winner",pts:10},
-  eliminated:{label:"Eliminated",pts:0},
+
+const ALL_CHEFS = TEAMS.flatMap(t => t.chefs);
+
+const EVENT_DEFS = {
+  quickfire:      { label:"Quick Fire Winner",       pts:5  },
+  top_elim:       { label:"Top of Elimination",      pts:3  },
+  win_elim:       { label:"Elimination Winner",      pts:7  },
+  bottom:         { label:"Bottom Judges Table",     pts:-2 },
+  restaurant_wars:{ label:"Restaurant Wars Winner",  pts:5  },
+  lck_win:        { label:"LCK Winner",              pts:10 },
+  eliminated:     { label:"Eliminated",              pts:0  },
 };
-const SEED=[
-  {chef:"Laurence",type:"quickfire",week:2,id:1001,auto:true},
-  {chef:"Rhoda",type:"win_elim",week:2,id:1002,auto:true},
-  {chef:"Jennifer",type:"top_elim",week:2,id:1003,auto:true},
-  {chef:"Sieger",type:"top_elim",week:2,id:1004,auto:true},
-  {chef:"Justin",type:"bottom",week:2,id:1005,auto:true},
-  {chef:"Nana",type:"bottom",week:2,id:1006,auto:true},
-  {chef:"Jassi",type:"bottom",week:2,id:1007,auto:true},
-  {chef:"Jassi",type:"eliminated",week:2,id:1008,auto:true},
-];
-const WP={Bayer:"Sieger",Bindra:"Jassi",Cardoso:"Sherry",Cochran:"Brittany",Diaz:"Oscar",Louie:"Laurence",Magbitang:"Rhoda",Tootla:"Justin",Wilmot:"Nana",Jones:"Anthony",Ha:"Duyen",Jackson:"Jennifer"};
-const ALL=TEAMS.flatMap(t=>t.chefs);
 
-let week=3,userEvs=[],syncedEvs=null;
-try{const s=localStorage.getItem("tc23");if(s)userEvs=JSON.parse(s);const w=localStorage.getItem("tc23w");if(w)week=parseInt(w);}catch(e){}
-document.getElementById("weekNum").textContent=week;
-document.getElementById("weekSel").value=week;
-
-function allEvs(){return[...(syncedEvs??SEED),...userEvs];}
-function save(){try{localStorage.setItem("tc23",JSON.stringify(userEvs));}catch(e){}}
-function saveWeek(w){week=w;document.getElementById("weekNum").textContent=w;document.getElementById("weekSel").value=w;try{localStorage.setItem("tc23w",String(w));}catch(e){}}
-function survPts(lw){if(lw<3)return 0;return Math.min(lw-2,12);}
-function elimWk(name){const e=allEvs().find(ev=>ev.chef===name&&ev.type==="eliminated");return e?e.week:null;}
-function chefScore(name){const ew=elimWk(name);const lw=ew?ew-1:week;let s=survPts(lw);allEvs().forEach(ev=>{if(ev.chef===name&&ev.type!=="eliminated")s+=EDEFS[ev.type].pts;});return s;}
-function teamScore(t){return t.chefs.reduce((s,c)=>s+chefScore(c),0);}
-function chefTeam(name){return TEAMS.find(t=>t.chefs.includes(name));}
-
-function changeWeek(d){saveWeek(Math.max(2,Math.min(14,week+d)));renderBoard();}
-
-function showTab(name,btn){
-  document.querySelectorAll(".main>div").forEach(el=>el.classList.add("hidden"));
-  document.getElementById("tab-"+name).classList.remove("hidden");
-  document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
-  btn.classList.add("active");
-  if(name==="history")renderHistory();
-  if(name==="scoreboard")renderBoard();
+// Survival: no credit for week 1. Surviving to week N (N>=3) = N-2 pts cumulative.
+function survivalPts(lastWk) {
+  if (lastWk < 3) return 0;
+  return Math.min(lastWk - 2, 12);
 }
 
-function renderBoard(){
-  const ranked=[...TEAMS].map(t=>({...t,total:teamScore(t)})).sort((a,b)=>b.total-a.total);
-  const el=document.getElementById("board");
-  el.innerHTML="";
-  ranked.forEach((team,i)=>{
-    const rc=["r1","r2","r3","r0"][Math.min(i,3)];
-    const div=document.createElement("div");
-    div.className="card";
-    div.innerHTML=`
-      <div class="card-header" onclick="toggleCard(this)">
+// ── SEED DATA through Week 3 ─────────────────────────────────
+// Week 2: Quickfire=Laurence, Elim win=Rhoda, Top=Jennifer/Sieger, Bottom=Justin/Nana/Jassi, Elim=Jassi
+// Week 3: Quickfire=Anthony, Elim win=Laurence, Top=Anthony/Brandon, Elim=Nana (to LCK)
+const SEED = [
+  { chef:"Laurence", type:"quickfire",  week:2, id:1001, auto:true },
+  { chef:"Rhoda",    type:"win_elim",   week:2, id:1002, auto:true },
+  { chef:"Jennifer", type:"top_elim",   week:2, id:1003, auto:true },
+  { chef:"Sieger",   type:"top_elim",   week:2, id:1004, auto:true },
+  { chef:"Justin",   type:"bottom",     week:2, id:1005, auto:true },
+  { chef:"Nana",     type:"bottom",     week:2, id:1006, auto:true },
+  { chef:"Jassi",    type:"bottom",     week:2, id:1007, auto:true },
+  { chef:"Jassi",    type:"eliminated", week:2, id:1008, auto:true },
+  { chef:"Anthony",  type:"quickfire",  week:3, id:1009, auto:true },
+  { chef:"Laurence", type:"win_elim",   week:3, id:1010, auto:true },
+  { chef:"Anthony",  type:"top_elim",   week:3, id:1011, auto:true },
+  { chef:"Brandon",  type:"top_elim",   week:3, id:1012, auto:true },
+  { chef:"Nana",     type:"eliminated", week:3, id:1013, auto:true },
+];
+
+// ── STATE ────────────────────────────────────────────────────
+let currentWeek = 4; // Week 3 ended; survivors earn +2 for reaching Week 4
+let userEvents  = JSON.parse(localStorage.getItem('tc_s23_v2') || '[]');
+let syncedEvents = null; // replaces SEED when Wikipedia sync succeeds
+
+function allEvents() {
+  return [...(syncedEvents ?? SEED), ...userEvents];
+}
+
+function save() { localStorage.setItem('tc_s23_v2', JSON.stringify(userEvents)); }
+
+function chefTeam(name) { return TEAMS.find(t => t.chefs.includes(name)); }
+
+function elimWeek(name) {
+  const e = allEvents().find(ev => ev.chef === name && ev.type === 'eliminated');
+  return e ? e.week : null;
+}
+
+function chefScore(name) {
+  const ew = elimWeek(name);
+  const lastWk = ew ? ew - 1 : currentWeek;
+  let sc = survivalPts(lastWk);
+  allEvents().forEach(ev => {
+    if (ev.chef === name && ev.type !== 'eliminated') sc += EVENT_DEFS[ev.type].pts;
+  });
+  return sc;
+}
+
+function teamScore(t) { return t.chefs.reduce((s,c) => s + chefScore(c), 0); }
+
+// ── SCOREBOARD ───────────────────────────────────────────────
+function renderScoreboard() {
+  const ranked = TEAMS.map(t => ({...t, total: teamScore(t)}))
+    .sort((a,b) => b.total - a.total);
+
+  const el = document.getElementById('scoreboardList');
+  el.innerHTML = '';
+
+  ranked.forEach((team, i) => {
+    const rc = i===0?'r1':i===1?'r2':i===2?'r3':'';
+    const card = document.createElement('div');
+    card.className = 'team-card';
+    card.innerHTML = `
+      <div class="team-header" onclick="toggleCard(this)">
         <div class="rank ${rc}">${i+1}</div>
-        <div><div class="team-name">${team.house}</div><div class="team-chefs">${team.chefs.join(" · ")}</div></div>
+        <div class="team-info">
+          <div class="team-name">${team.house}</div>
+          <div class="team-chefs">${team.chefs.join(' · ')}</div>
+        </div>
         <div class="team-score">${team.total}</div>
-        <button class="exp-btn">▾</button>
+        <button class="expand-btn">▾</button>
       </div>
-      <div class="chef-grid hidden">${team.chefs.map(chefBlock).join("")}</div>`;
-    el.appendChild(div);
+      <div class="team-detail">
+        <div class="chef-section">${team.chefs.map(chefBlock).join('')}</div>
+      </div>`;
+    el.appendChild(card);
   });
 }
 
-function toggleCard(h){
-  const grid=h.nextElementSibling;
-  const btn=h.querySelector(".exp-btn");
-  grid.classList.toggle("hidden");
-  btn.classList.toggle("open");
-}
+function chefBlock(name) {
+  const ew = elimWeek(name);
+  const lastWk = ew ? ew-1 : currentWeek;
+  const sp = survivalPts(lastWk);
+  const score = chefScore(name);
+  const isOut = !!ew;
+  const evs = allEvents().filter(e => e.chef === name && e.type !== 'eliminated');
 
-function chefBlock(name){
-  const ew=elimWk(name);const lw=ew?ew-1:week;
-  const sp=survPts(lw);const score=chefScore(name);const isOut=!!ew;
-  const evs=allEvs().filter(e=>e.chef===name&&e.type!=="eliminated");
-  let rows="";
-  if(sp>0)rows+=`<div class="ev-row"><span class="ev-name">Survived to Wk${lw}</span><span class="pos">+${sp}</span></div>`;
-  evs.forEach(ev=>{const d=EDEFS[ev.type];rows+=`<div class="ev-row"><span class="ev-name">Wk${ev.week}: ${d.label}</span><span class="${d.pts>=0?"pos":"neg"}">${d.pts>0?"+":""}${d.pts}</span></div>`;});
-  if(isOut)rows+=`<div class="ev-row"><span style="color:#E07070">Eliminated Wk${ew}</span><span></span></div>`;
-  if(!rows)rows=`<div class="ev-row"><span class="ev-name" style="font-style:italic">No events yet</span></div>`;
-  return`<div class="chef-block">
-    <div class="chef-header"><div class="chef-name">${name}</div><div class="chef-pts">${score} pts</div></div>
-    <div class="status-row"><div class="dot${isOut?" out":""}"></div><div class="status-txt">${isOut?`Eliminated Wk${ew}`:`Active · Wk${week}`}</div></div>
-    <div class="ev-log">${rows}</div>
+  let rows = '';
+  if (sp > 0) rows += `<div class="ev"><span class="ev-name">Survived to Wk${lastWk} (+${sp} pts)</span><span class="pts pos">+${sp}</span></div>`;
+  evs.forEach(ev => {
+    const d = EVENT_DEFS[ev.type];
+    const cls = d.pts >= 0 ? 'pos' : 'neg';
+    rows += `<div class="ev"><span class="ev-name">Wk${ev.week}: ${d.label}</span><span class="pts ${cls}">${d.pts>0?'+':''}${d.pts}</span></div>`;
+  });
+  if (isOut) rows += `<div class="ev"><span class="ev-name" style="color:#E07070">Eliminated Wk${ew}</span><span></span></div>`;
+  if (!rows) rows = `<div class="ev"><span class="ev-name" style="font-style:italic">No events yet</span><span></span></div>`;
+
+  return `<div class="chef-block">
+    <div class="chef-block-header"><div class="chef-name">${name}</div><div class="chef-score">${score} pts</div></div>
+    <div class="chef-status"><div class="dot ${isOut?'out':''}"></div><div class="status-text">${isOut?`Eliminated Wk${ew}`:`Active · Wk${currentWeek}`}</div></div>
+    <div class="event-log">${rows}</div>
   </div>`;
 }
 
-function populateChefSel(){
-  const s=document.getElementById("chefSel");
-  TEAMS.forEach(t=>t.chefs.forEach(c=>{const o=document.createElement("option");o.value=c;o.textContent=`${c} (${t.house})`;s.appendChild(o);}));
+function toggleCard(h) { h.parentElement.classList.toggle('open'); }
+
+function changeWeek(d) {
+  currentWeek = Math.max(2, Math.min(14, currentWeek + d));
+  document.getElementById('weekDisplay').textContent = currentWeek;
+  document.getElementById('eventWeek').value = currentWeek;
+  renderScoreboard();
 }
 
-function logEvent(){
-  const chef=document.getElementById("chefSel").value;
-  const type=document.getElementById("typeSel").value;
-  const wk=parseInt(document.getElementById("weekSel").value);
-  userEvs.push({chef,type,week:wk,id:Date.now(),auto:false});
-  save();renderBoard();
-  const t=document.getElementById("toast");t.style.display="block";
-  setTimeout(()=>t.style.display="none",2500);
+function showTab(name, btn) {
+  document.querySelectorAll('.main>div').forEach(el => el.classList.add('hidden'));
+  document.getElementById('tab-'+name).classList.remove('hidden');
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  if (name==='history') renderHistory();
+  if (name==='scoreboard') renderScoreboard();
 }
 
-function renderHistory(){
-  const evs=allEvs();
-  const el=document.getElementById("histContent");
-  if(!evs.length){el.innerHTML='<div class="empty">No events yet.</div>';return;}
-  let html='<table><thead><tr><th>Week</th><th>Chef</th><th>Team</th><th>Event</th><th>Pts</th><th></th><th></th></tr></thead><tbody>';
-  [...evs].sort((a,b)=>b.week-a.week||b.id-a.id).forEach(ev=>{
-    const d=EDEFS[ev.type];const team=chefTeam(ev.chef);
-    const cls=d.pts>0?"pos":d.pts<0?"neg":"";
-    html+=`<tr><td>Wk${ev.week}</td><td>${ev.chef}</td><td>${team?.house||"—"}</td><td>${d.label}</td>
-    <td class="${cls}">${d.pts!==0?(d.pts>0?"+":"")+d.pts:"—"}</td>
-    <td>${ev.auto?'<span class="auto-badge">auto</span>':""}</td>
-    <td>${!ev.auto?`<button class="del-btn" onclick="delEvent(${ev.id})">✕</button>`:""}</td></tr>`;
+// ── LOG EVENT ────────────────────────────────────────────────
+function populateChefSelect() {
+  const sel = document.getElementById('chefSelect');
+  TEAMS.forEach(t => t.chefs.forEach(c => {
+    const o = document.createElement('option');
+    o.value = c; o.textContent = `${c} (${t.house})`; sel.appendChild(o);
+  }));
+}
+
+function logEvent() {
+  const chef = document.getElementById('chefSelect').value;
+  const type = document.getElementById('eventSelect').value;
+  const week = parseInt(document.getElementById('eventWeek').value);
+  userEvents.push({chef, type, week, id: Date.now(), auto: false});
+  save(); renderScoreboard();
+  const t = document.getElementById('toast');
+  t.style.display = 'block';
+  setTimeout(() => t.style.display='none', 2500);
+}
+
+// ── HISTORY ──────────────────────────────────────────────────
+function renderHistory() {
+  const body = document.getElementById('histBody');
+  const empty = document.getElementById('histEmpty');
+  const evs = allEvents();
+  body.innerHTML = '';
+  if (!evs.length) { empty.style.display='block'; return; }
+  empty.style.display = 'none';
+  [...evs].sort((a,b) => b.week-a.week || b.id-a.id).forEach(ev => {
+    const d = EVENT_DEFS[ev.type];
+    const team = chefTeam(ev.chef);
+    const cls = d.pts>0?'pos':d.pts<0?'neg':'';
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>Week ${ev.week}</td><td>${ev.chef}</td><td>${team?.house||'—'}</td>
+      <td>${d.label}</td>
+      <td class="${cls}" style="font-weight:500">${d.pts!==0?(d.pts>0?'+':'')+d.pts:'—'}</td>
+      <td>${ev.auto?'<span class="auto-badge">auto</span>':''}</td>
+      <td>${ev.auto?'':`<button class="del-btn" onclick="delEvent(${ev.id})">remove</button>`}</td>`;
+    body.appendChild(tr);
   });
-  html+="</tbody></table>";
-  el.innerHTML=html;
 }
 
-function delEvent(id){userEvs=userEvs.filter(e=>e.id!==id);save();renderHistory();renderBoard();}
+function delEvent(id) {
+  userEvents = userEvents.filter(e => e.id !== id);
+  save(); renderHistory(); renderScoreboard();
+}
 
-function resolveChef(raw){
-  if(/Brandon|B\.?\s*Dearden/i.test(raw))return"Brandon";
-  if(/Jonathan|J\.?\s*Dearden/i.test(raw))return"Jonathan";
-  for(const[k,v]of Object.entries(WP))if(raw.includes(k))return v;
-  for(const c of ALL)if(raw.toLowerCase().includes(c.toLowerCase()))return c;
+// ── WIKIPEDIA SYNC ───────────────────────────────────────────
+// Chef last-name → our first name (for parsing Wikipedia wikitext result tables)
+const WP_NAME_MAP = {
+  "Bayer":"Sieger","Bindra":"Jassi","Cardoso":"Sherry","Cochran":"Brittany",
+  "Diaz":"Oscar","Louie":"Laurence","Magbitang":"Rhoda","Tootla":"Justin",
+  "Wilmot":"Nana","Jones":"Anthony","Ha":"Duyen","Jackson":"Jennifer",
+};
+// Twins need special handling: B. Dearden = Brandon, J. Dearden = Jonathan
+function resolveWpChef(raw) {
+  const r = raw.trim();
+  if (/Brandon|B\.?\s*Dearden/i.test(r)) return "Brandon";
+  if (/Jonathan|J\.?\s*Dearden/i.test(r)) return "Jonathan";
+  for (const [key, val] of Object.entries(WP_NAME_MAP)) {
+    if (r.includes(key)) return val;
+  }
+  // Try first name direct
+  for (const c of ALL_CHEFS) if (r.toLowerCase().includes(c.toLowerCase())) return c;
   return null;
 }
 
-async function syncWiki(){
-  const st=document.getElementById("syncSt");
-  st.textContent="Syncing…";st.className="sync-st";
-  try{
-    const r=await fetch("https://en.wikipedia.org/w/api.php?action=parse&page=Top_Chef:_Carolinas&prop=wikitext&format=json&origin=*");
-    const data=await r.json();
-    const wt=data?.parse?.wikitext?.["*"];
-    if(!wt)throw new Error("No wikitext");
-    const parsed=parseWiki(wt);
-    if(!parsed.length){st.textContent="Wikipedia not yet updated — pre-loaded data active";st.className="sync-st err";return;}
-    syncedEvs=parsed;
-    const maxWk=Math.max(...parsed.map(e=>e.week),3);
-    if(maxWk>week)saveWeek(maxWk);
-    renderBoard();
-    st.textContent=`Synced ${new Date().toLocaleTimeString()} · ${parsed.length} results thru Wk${maxWk}`;
-    st.className="sync-st ok";
-  }catch(e){st.textContent="Sync failed — pre-loaded data active";st.className="sync-st err";}
+async function syncWikipedia() {
+  const st = document.getElementById('syncStatus');
+  st.textContent = 'Syncing from Wikipedia…';
+  st.className = 'sync-status';
+
+  try {
+    const url = 'https://en.wikipedia.org/w/api.php?action=parse&page=Top_Chef:_Carolinas&prop=wikitext&format=json&origin=*';
+    const r = await fetch(url);
+    const data = await r.json();
+    const wt = data?.parse?.wikitext?.['*'];
+    if (!wt) throw new Error('No wikitext returned');
+
+    const parsed = parseWikiResults(wt);
+
+    if (parsed.length === 0) {
+      st.textContent = "Wikipedia episode table not yet populated — pre-loaded data still active";
+      st.className = 'sync-status err';
+      return;
+    }
+
+    syncedEvents = parsed;
+    renderScoreboard();
+    const maxWk = Math.max(...parsed.map(e=>e.week), 2);
+    if (currentWeek < maxWk) { currentWeek = maxWk; document.getElementById('weekDisplay').textContent = maxWk; }
+    st.textContent = `Synced at ${new Date().toLocaleTimeString()} · ${parsed.length} results loaded through Week ${maxWk}`;
+    st.className = 'sync-status ok';
+  } catch(err) {
+    st.textContent = `Sync failed (${err.message}) · pre-loaded data still active`;
+    st.className = 'sync-status err';
+  }
 }
 
-function parseWiki(wt){
-  const evs=[];let id=3000;
-  const lines=wt.split("\n");let inT=false;let cols=[];
-  for(let i=0;i<lines.length;i++){
-    const ln=lines[i];
-    if(!inT&&/Episode results|result.*episode/i.test(ln)){inT=true;continue;}
-    if(!inT)continue;
-    if(ln.trim()==="|}"){inT=false;continue;}
-    if(ln.trim().startsWith("!")&&/\d/.test(ln)){cols=ln.split("!!").map(c=>parseInt(c.replace(/[^0-9]/g,""))).filter(n=>!isNaN(n));continue;}
-    if(ln.trim().startsWith("|")&&!ln.trim().startsWith("|-")&&!ln.trim().startsWith("!")){
-      const cells=ln.trim().replace(/^\|/,"").split("||").map(c=>c.replace(/\[\[[^\]]*\|([^\]]*)\]\]/g,"$1").replace(/\[\[([^\]]*)\]\]/g,"$1").replace(/{{[^}]*}}/g,"").replace(/'''|''|\[\[|\]\]/g,"").trim());
-      if(cells.length<2)continue;
-      const chef=resolveChef(cells[0]);if(!chef)continue;
-      cells.slice(1).forEach((result,ci)=>{
-        const wk=cols[ci]??ci+1;if(wk<2)return;
-        const r=result.toUpperCase().replace(/\s/g,"");
-        if(r==="WIN"||r==="WINNER"||r==="W")evs.push({chef,type:"win_elim",week:wk,id:id++,auto:true});
-        else if(r==="HIGH"||r==="H")evs.push({chef,type:"top_elim",week:wk,id:id++,auto:true});
-        else if(r==="LOW"||r==="L")evs.push({chef,type:"bottom",week:wk,id:id++,auto:true});
-        else if(r==="ELIM"||r==="OUT"||r==="E"){evs.push({chef,type:"bottom",week:wk,id:id++,auto:true});evs.push({chef,type:"eliminated",week:wk,id:id++,auto:true});}
+function parseWikiResults(wikitext) {
+  // Wikipedia Top Chef result tables store data in rows like:
+  // | Chef Name || WIN || HIGH || IN || LOW || ELIM  (one cell per episode)
+  // We parse the results section and map WIN→win_elim, HIGH→top_elim, LOW→bottom, ELIM→eliminated
+  const events = [];
+  let id = 3000;
+
+  // Split into lines and find result rows
+  const lines = wikitext.split('\n');
+  let inTable = false;
+  let colEpisodes = []; // track which column = which week
+
+  for (let i = 0; i < lines.length; i++) {
+    const ln = lines[i];
+
+    // Detect start of results table (look for episode header row)
+    if (!inTable && /Episode results|result.*episode/i.test(ln)) { inTable = true; continue; }
+    if (!inTable) continue;
+    if (ln.trim() === '|}') { inTable = false; continue; }
+
+    // Header row with episode numbers
+    if (ln.trim().startsWith('!') && /\d/.test(ln)) {
+      const cols = ln.split('!!').map(c => c.replace(/[^0-9]/g,''));
+      colEpisodes = cols.map(c => parseInt(c)).filter(n => !isNaN(n));
+      continue;
+    }
+
+    // Data rows: start with | ChefName || result || ...
+    if (ln.trim().startsWith('|') && !ln.trim().startsWith('|-') && !ln.trim().startsWith('!')) {
+      const raw = ln.trim().replace(/^\|/, '');
+      const cells = raw.split('||').map(c =>
+        c.replace(/\[\[[^\]]*\|([^\]]*)\]\]/g, '$1')
+         .replace(/\[\[([^\]]*)\]\]/g, '$1')
+         .replace(/{{[^}]*}}/g, '')
+         .replace(/'''|''|\[\[|\]\]/g, '')
+         .trim()
+      );
+      if (cells.length < 2) continue;
+
+      const chefName = resolveWpChef(cells[0]);
+      if (!chefName) continue;
+
+      cells.slice(1).forEach((result, ci) => {
+        // Determine which week this column is
+        const wk = colEpisodes[ci] !== undefined ? colEpisodes[ci] : ci + 1;
+        if (wk < 2) return; // Week 1 doesn't count
+        const r = result.toUpperCase().replace(/\s/g, '');
+
+        if (r === 'WIN' || r === 'WINNER' || r === 'W') {
+          events.push({chef:chefName, type:'win_elim', week:wk, id:id++, auto:true});
+        } else if (r === 'HIGH' || r === 'H') {
+          events.push({chef:chefName, type:'top_elim', week:wk, id:id++, auto:true});
+        } else if (r === 'LOW' || r === 'L') {
+          events.push({chef:chefName, type:'bottom', week:wk, id:id++, auto:true});
+        } else if (r === 'ELIM' || r === 'OUT' || r === 'E') {
+          events.push({chef:chefName, type:'bottom',    week:wk, id:id++, auto:true});
+          events.push({chef:chefName, type:'eliminated',week:wk, id:id++, auto:true});
+        } else if (r === 'WINRIM' || r === 'WIM') {
+          // Won with immunity — still counts as elimination win
+          events.push({chef:chefName, type:'win_elim', week:wk, id:id++, auto:true});
+        }
+        // QF wins are in a separate table — handled in quickfire pass below
       });
     }
   }
-  return evs;
+
+  // Second pass: look for quickfire winner annotations
+  // Wikipedia often has a separate QF results table or footnotes
+  const qfRows = wikitext.match(/quickfire[^\n]{0,200}/gi) || [];
+  qfRows.forEach(row => {
+    ALL_CHEFS.forEach(chef => {
+      if (row.toLowerCase().includes(chef.toLowerCase()) &&
+          (row.toLowerCase().includes('won') || row.toLowerCase().includes('winner'))) {
+        // Try to find episode/week number near this row
+        const wkMatch = row.match(/\b([2-9]|1[0-4])\b/);
+        const wk = wkMatch ? parseInt(wkMatch[1]) : null;
+        if (wk && wk >= 2 && !events.find(e => e.chef===chef && e.type==='quickfire' && e.week===wk)) {
+          events.push({chef, type:'quickfire', week:wk, id:id++, auto:true});
+        }
+      }
+    });
+  });
+
+  return events;
 }
 
-populateChefSel();
-renderBoard();
+// ── INIT ─────────────────────────────────────────────────────
+populateChefSelect();
+document.getElementById('eventWeek').value = currentWeek;
+renderScoreboard();
 </script>
+
 </body>
 </html>
