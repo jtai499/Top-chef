@@ -98,7 +98,7 @@
   <div class="week-control">
     <span class="week-label">Current Week</span>
     <button class="week-btn" onclick="changeWeek(-1)">−</button>
-    <div class="week-display" id="weekDisplay">4</div>
+    <div class="week-display" id="weekDisplay">5</div>
     <button class="week-btn" onclick="changeWeek(1)">+</button>
   </div>
 </header>
@@ -115,7 +115,7 @@
   <div id="tab-scoreboard">
     <div class="sync-bar">
       <button class="sync-btn" onclick="syncWikipedia()">↻ Sync from Wikipedia</button>
-      <span class="sync-status" id="syncStatus">Pre-loaded through Week 3 · Week 4 survival applied · Click sync after new episodes air</span>
+      <span class="sync-status" id="syncStatus">Pre-loaded through Week 4 · Week 5 survival applied · Click sync after new episodes air</span>
     </div>
     <div class="scoreboard" id="scoreboardList"></div>
   </div>
@@ -213,9 +213,10 @@ function survivalPts(lastWk) {
   return Math.min(lastWk - 2, 12);
 }
 
-// ── SEED DATA through Week 3 ─────────────────────────────────
-// Week 2: Quickfire=Laurence, Elim win=Rhoda, Top=Jennifer/Sieger, Bottom=Justin/Nana/Jassi, Elim=Jassi
-// Week 3: Quickfire=Anthony, Elim win=Laurence, Top=Anthony/Brandon, Elim=Nana (to LCK)
+// ── SEED DATA through Week 4 ─────────────────────────────────
+// Week 2: QF=Laurence, Win=Rhoda, Top=Jennifer/Sieger, Bot=Justin/Nana/Jassi, Elim=Jassi
+// Week 3: QF=Anthony, Win=Laurence, Top=Anthony/Brandon, Elim=Nana (LCK)
+// Week 4: QF=Justin/Jennifer/Sieger (team), Win=Sieger, Top=Sherry/Laurence, Bot=Jennifer/Anthony/Brittany, Elim=Brittany (LCK)
 const SEED = [
   { chef:"Laurence", type:"quickfire",  week:2, id:1001, auto:true },
   { chef:"Rhoda",    type:"win_elim",   week:2, id:1002, auto:true },
@@ -230,10 +231,20 @@ const SEED = [
   { chef:"Anthony",  type:"top_elim",   week:3, id:1011, auto:true },
   { chef:"Brandon",  type:"top_elim",   week:3, id:1012, auto:true },
   { chef:"Nana",     type:"eliminated", week:3, id:1013, auto:true },
+  { chef:"Justin",   type:"quickfire",  week:4, id:1014, auto:true },
+  { chef:"Jennifer", type:"quickfire",  week:4, id:1015, auto:true },
+  { chef:"Sieger",   type:"quickfire",  week:4, id:1016, auto:true },
+  { chef:"Sieger",   type:"win_elim",   week:4, id:1017, auto:true },
+  { chef:"Sherry",   type:"top_elim",   week:4, id:1018, auto:true },
+  { chef:"Laurence", type:"top_elim",   week:4, id:1019, auto:true },
+  { chef:"Jennifer", type:"bottom",     week:4, id:1020, auto:true },
+  { chef:"Anthony",  type:"bottom",     week:4, id:1021, auto:true },
+  { chef:"Brittany", type:"bottom",     week:4, id:1022, auto:true },
+  { chef:"Brittany", type:"eliminated", week:4, id:1023, auto:true },
 ];
 
 // ── STATE ────────────────────────────────────────────────────
-let currentWeek = 4; // Week 3 ended; survivors earn +2 for reaching Week 4
+let currentWeek = 5; // Week 4 ended; survivors earn +3 for reaching Week 5
 let userEvents  = JSON.parse(localStorage.getItem('tc_s23_v2') || '[]');
 let syncedEvents = null; // replaces SEED when Wikipedia sync succeeds
 
